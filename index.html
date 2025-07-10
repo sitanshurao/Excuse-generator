@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Excuse Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.1) 10px,
+                rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(-100px) translateY(-100px) rotate(0deg); }
+            100% { transform: translateX(100px) translateY(100px) rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus, .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+
+        .results {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .result-content {
+            padding: 30px;
+            min-height: 300px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .result-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .history-item .timestamp {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .history-item .content {
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .history-item .tags {
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: #667eea;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-right: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .proof-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .proof-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .proof-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ffc107;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 Intelligent Excuse Generator</h1>
+            <p>Professional excuse, apology, and proof generation system</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls">
+                <div class="form-group">
+                    <label for="genType">Generation Type:</label>
+                    <select id="genType">
+                        <option value="excuse">Excuse</option>
+                        <option value="apology">Apology</option>
+                        <option value="proof">Proof Documents</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="scenario">Scenario:</label>
+                    <select id="scenario">
+                        <option value="work">Work</option>
+                        <option value="business">Business</option>
+                        <option value="school">School</option>
+                        <option value="social">Social</option>
+                        <option value="family">Family</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tone">Tone:</label>
+                    <select id="tone">
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="emotional">Emotional</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="urgencyGroup">
+                    <label for="urgency">Urgency Level:</label>
+                    <select id="urgency">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="generateContent()">Generate Content</button>
+                <button class="btn btn-secondary" onclick="generateSupporting()">Generate Supporting Evidence</button>
+                <button class="btn btn-warning" onclick="simulateEmergency()">Simulate Emergency</button>
+            </div>
+
+            <div class="results">
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('results')">Results</button>
+                    <button class="tab" onclick="showTab('history')">History</button>
+                </div>
+
+                <div id="results" class="tab-content active">
+                    <div class="result-header">Generated Content</div>
+                    <div class="result-content">
+                        <p style="text-align: center; color: #666; margin-top: 100px;">
+                            Select your options and click "Generate Content" to begin
+                        </p>
+                    </div>
+                </div>
+
+                <div id="history" class="tab-content">
+                    <div class="result-header">Generation History</div>
+                    <div class="result-content">
+                        <div id="historyList">
+                            <p style="text-align: center; color: #666; margin-top: 100px;">
+                                No generation history yet
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let generationHistory = [];
+
+        // Show/hide urgency based on generation type
+        document.getElementById('genType').addEventListener('change', function() {
+            const urgencyGroup = document.getElementById('urgencyGroup');
+            if (this.value === 'apology') {
+                urgencyGroup.style.display = 'none';
+            } else {
+                urgencyGroup.style.display = 'block';
+            }
+        });
+
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Update tab buttons
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function showLoading() {
+            const resultContent = document.querySelector('#results .result-content');
+            resultContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Generating your content...</p>
+                </div>
+            `;
+        }
+
+        function generateContent() {
+            showLoading();
+            
+            const genType = document.getElementById('genType').value;
+            const scenario = document.getElementById('scenario').value;
+            const tone = document.getElementById('tone').value;
+            const urgency = document.getElementById('urgency').value;
+            
+            // Call Flask API
+            fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: genType,
+                    scenario: scenario,
+                    tone: tone,
+                    urgency: urgency
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResults(data.content, genType);
+                    addToHistory(data.content, genType, scenario, tone, urgency);
+                } else {
+                    // Fallback to local generation
+                    let content = '';
+                    switch(genType) {
+                        case 'excuse':
+                            content = generateExcuse(scenario, tone, urgency);
+                            break;
+                        case 'apology':
+                            content = generateApology(scenario, tone);
+                            break;
+                        case 'proof':
+                            content = generateProof(scenario, tone, urgency);
+                            break;
+                    }
+                    displayResults(content, genType);
+                    addToHistory(content, genType, scenario, tone, urgency);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Fallback to local generation
+                let content = '';
+                switch(genType) {
+                    case 'excuse':
+                        content = generateExcuse(scenario, tone, urgency);
+                        break;
+                    case 'apology':
+                        content = generateApology(scenario, tone);
+                        break;
+                    case 'proof':
+                        content = generateProof(scenario, tone, urgency);
+                        break;
+                }
+                displayResults(content, genType);
+                addToHistory(content, genType, scenario, tone, urgency);
+            });
+        }
+
+        function generateExcuse(scenario, tone, urgency) {
+            const excuses = {
+                work: {
+                    professional: {
+                        low: "I apologize for the slight delay this morning. I encountered an unexpected transportation issue that has now been resolved. I'm fully focused and ready to proceed with today's tasks.",
+                        medium: "I regret to inform you that I will be unable to attend the meeting due to a family emergency that requires my immediate attention. I will catch up on all developments and provide updates as soon as possible.",
+                        high: "I must inform you of an urgent family medical situation that requires my immediate presence at the hospital. I will do my best to monitor emails and respond to critical matters remotely."
+                    },
+                    casual: {
+                        low: "Hey, running a bit late today - my alarm didn't go off and I'm scrambling to get ready. Should be there in about 20 minutes!",
+                        medium: "Sorry, I won't be able to make it in today. My car broke down and I'm waiting for a tow truck. I'll work from home and join the video calls.",
+                        high: "OMG, I'm so sorry but I have to deal with a family emergency right now. My grandmother fell and I'm rushing to the hospital. I'll update you when I can."
+                    },
+                    emotional: {
+                        low: "I'm feeling quite overwhelmed today and need to take a mental health day. I'll be back tomorrow feeling refreshed and ready to give my best.",
+                        medium: "I'm going through a difficult personal situation right now and need some time to handle it. I'll keep you updated on my availability.",
+                        high: "I'm experiencing a personal crisis and am not in the right headspace to work effectively today. I hope you understand and I'll be back as soon as I can."
+                    },
+                    urgent: {
+                        low: "URGENT: Minor family matter needs immediate attention. Will be 30 minutes late but fully available after that.",
+                        medium: "URGENT: Dealing with a home emergency (water leak). Working remotely today but fully available via phone/email.",
+                        high: "URGENT: Family member hospitalized. May be unreachable for several hours. Will update as soon as possible."
+                    }
+                },
+                social: {
+                    casual: {
+                        low: "Hey! I'm running super late - got caught up with something at home. Give me like 30 mins and I'll be there!",
+                        medium: "So sorry, but I won't be able to make it tonight. Something came up with my family that I need to handle. Rain check?",
+                        high: "OMG I'm so sorry but I have to cancel last minute. There's a family emergency and I need to be at the hospital. I'll explain later!"
+                    },
+                    emotional: {
+                        low: "I'm having a really tough day emotionally and don't think I'd be good company tonight. Can we reschedule?",
+                        medium: "I'm going through something personal right now and need some time to process. I hope you understand.",
+                        high: "I'm in a really dark place right now and need to focus on taking care of myself. I'm sorry for canceling but I hope you understand."
+                    }
+                },
+                family: {
+                    emotional: {
+                        low: "I'm feeling really overwhelmed with everything going on and need some quiet time at home today.",
+                        medium: "I'm dealing with some personal issues and need some space to work through them. I'll reach out when I'm ready.",
+                        high: "I'm going through a really difficult time right now and need some time to process everything. Please give me some space."
+                    }
+                }
+            };
+            
+            return excuses[scenario]?.[tone]?.[urgency] || "I apologize, but I'm unable to proceed as planned due to unforeseen circumstances. Thank you for your understanding.";
+        }
+
+        function generateApology(scenario, tone) {
+            const apologies = {
+                work: {
+                    professional: "I sincerely apologize for the inconvenience caused by my absence. I understand the impact this may have had on the team and our projects. I take full responsibility and am committed to ensuring this doesn't happen again. I will work diligently to catch up on any missed work and make arrangements to prevent similar issues in the future.",
+                    casual: "Hey, I'm really sorry about today. I know it probably messed up some plans and that's totally on me. I'll make sure to give you guys more heads up next time and I'll definitely make it up to the team.",
+                    emotional: "I am deeply sorry for my absence and any stress it may have caused. I was dealing with some personal challenges that overwhelmed me, but I realize I should have communicated better. I value our working relationship and will work hard to regain your trust."
+                },
+                social: {
+                    casual: "I'm so sorry for bailing on you guys last minute! I know it's super annoying when people cancel and I totally get if you're mad. Let me make it up to you - dinner's on me next time!",
+                    emotional: "I'm truly sorry for not showing up. I was going through something really heavy and didn't handle it well. I should have communicated better instead of just disappearing. I hope you can forgive me and I promise to be more upfront in the future."
+                },
+                family: {
+                    emotional: "I'm so sorry for how I acted and for not being there when you needed me. Family means everything to me and I hate that I let you down. I was dealing with my own stuff but that's no excuse for not being present for you. Please forgive me."
+                }
+            };
+            
+            return apologies[scenario]?.[tone] || "I sincerely apologize for my actions and any inconvenience caused. I take full responsibility and am committed to making things right.";
+        }
+
+        function generateProof(scenario, tone, urgency) {
+            const currentDate = new Date().toLocaleDateString();
+            const currentTime = new Date().toLocaleTimeString();
+            
+            return `
+                <div class="proof-section">
+                    <h3>📋 Supporting Documentation Package</h3>
+                    
+                    <div class="proof-item">
+                        <h4>1. Official Medical Certificate</h4>
+                        <p><strong>Date:</strong> ${currentDate}</p>
+                        <p><strong>Patient:</strong> [Your Name]</p>
+                        <p><strong>Diagnosis:</strong> Acute stress reaction requiring immediate attention</p>
+                        <p><strong>Recommendation:</strong> Rest and recovery period of 24-48 hours</p>
+                        <p><strong>Physician:</strong> Dr. Sarah Johnson, MD</p>
+                        <p><strong>License:</strong> #MED-2024-${Math.floor(Math.random() * 10000)}</p>
+                    </div>
+                    
+                    <div class="proof-item">
+                        <h4>2. Location Verification Log</h4>
+                        <p><strong>Timestamp:</strong> ${currentDate} ${currentTime}</p>
+                        <p><strong>Location:</strong> City General Hospital, Emergency Department</p>
+                        <p><strong>GPS Coordinates:</strong> 40.7128°N, 74.0060°W</p>
+                        <p><strong>Duration:</strong> 3 hours 45 minutes</p>
+                    </div>
+                    
+                    <div class="proof-item">
+                        <h4>3. Communication Log</h4>
+                        <p><strong>Emergency Contact:</strong> +1 (555) 123-4567</p>
+                        <p><strong>Message Sent:</strong> "Emergency situation. Will be unreachable for several hours. Will update soon."</p>
+                        <p><strong>Status:</strong> Delivered at ${currentTime}</p>
+                    </div>
+                    
+                    <div class="proof-item">
+                        <h4>4. Supporting Evidence</h4>
+                        <p>• Hospital admission bracelet (Patient ID: #${Math.floor(Math.random() * 100000)})</p>
+                        <p>• Prescription receipt (Rx #${Math.floor(Math.random() * 10000)})</p>
+                        <p>• Parking validation stub (Time: ${currentTime})</p>
+                        <p>• Emergency contact call log</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateSupporting() {
+            const scenario = document.getElementById('scenario').value;
+            const tone = document.getElementById('tone').value;
+            const urgency = document.getElementById('urgency').value;
+            
+            showLoading();
+            
+            setTimeout(() => {
+                const supportingContent = `
+                    <div class="result-item">
+                        <h3>📧 Follow-up Email Template</h3>
+                        <p>Subject: Follow-up on [Date] Absence</p>
+                        <p>Dear [Recipient],</p>
+                        <p>I wanted to follow up on my absence from [event/meeting] on [date]. I have now resolved the situation and am back to full capacity. Please let me know if there's anything I need to catch up on or any way I can make up for the inconvenience caused.</p>
+                        <p>Best regards,<br>[Your Name]</p>
+                    </div>
+                    
+                    <div class="result-item">
+                        <h3>📱 Text Message Templates</h3>
+                        <p><strong>Update message:</strong> "Situation resolved. Back to normal schedule tomorrow. Thanks for understanding."</p>
+                        <p><strong>Confirmation:</strong> "Confirmed for [next meeting/event]. Looking forward to being there."</p>
+                    </div>
+                    
+                    <div class="result-item">
+                        <h3>🔄 Recovery Action Plan</h3>
+                        <p>1. Send immediate update to affected parties</p>
+                        <p>2. Reschedule any missed appointments</p>
+                        <p>3. Provide status update on ongoing projects</p>
+                        <p>4. Implement preventive measures for future</p>
+                    </div>
+                `;
+                
+                document.querySelector('#results .result-content').innerHTML = supportingContent;
+                addToHistory(supportingContent, 'supporting', scenario, tone, urgency);
+            }, 1000);
+        }
+
+        function simulateEmergency() {
+            const scenario = document.getElementById('scenario').value;
+            
+            showLoading();
+            
+            // Call Flask API
+            fetch('/api/emergency', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    scenario: scenario
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector('#results .result-content').innerHTML = data.content;
+                    addToHistory(data.content, 'emergency', scenario, 'urgent', 'high');
+                } else {
+                    // Fallback to local simulation
+                    setTimeout(() => {
+                        const emergencyContent = `
+                            <div class="result-item" style="border-left-color: #dc3545; background: #f8d7da;">
+                                <h3>🚨 Emergency Simulation Active</h3>
+                                <p><strong>Status:</strong> Emergency contact simulation initiated</p>
+                                <p><strong>Time:</strong> ${new Date().toLocaleTimeString()}</p>
+                                <p><strong>Duration:</strong> 3-5 minutes</p>
+                            </div>
+                            
+                            <div class="result-item">
+                                <h3>📞 Simulated Emergency Call</h3>
+                                <p><strong>Caller:</strong> Emergency Contact</p>
+                                <p><strong>Message:</strong> "Hello? I need help with an emergency situation. Can you please call me back immediately?"</p>
+                                <p><strong>Call Duration:</strong> 2 minutes 30 seconds</p>
+                            </div>
+                        `;
+                        
+                        document.querySelector('#results .result-content').innerHTML = emergencyContent;
+                        addToHistory(emergencyContent, 'emergency', scenario, 'urgent', 'high');
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Fallback to local simulation
+                setTimeout(() => {
+                    const emergencyContent = `
+                        <div class="result-item" style="border-left-color: #dc3545; background: #f8d7da;">
+                            <h3>🚨 Emergency Simulation Active</h3>
+                            <p><strong>Status:</strong> Emergency contact simulation initiated</p>
+                            <p><strong>Time:</strong> ${new Date().toLocaleTimeString()}</p>
+                            <p><strong>Duration:</strong> 3-5 minutes</p>
+                        </div>
+                    `;
+                    
+                    document.querySelector('#results .result-content').innerHTML = emergencyContent;
+                    addToHistory(emergencyContent, 'emergency', scenario, 'urgent', 'high');
+                }, 2000);
+            });
+        }
+
+        function displayResults(content, type) {
+            const resultContent = document.querySelector('#results .result-content');
+            resultContent.innerHTML = `
+                <div class="result-item">
+                    <h3>Generated ${type.charAt(0).toUpperCase() + type.slice(1)}</h3>
+                    <p>${content}</p>
+                </div>
+            `;
+        }
+
+        function addToHistory(content, type, scenario, tone, urgency) {
+            const historyItem = {
+                timestamp: new Date().toISOString(),
+                content: content,
+                type: type,
+                scenario: scenario,
+                tone: tone,
+                urgency: urgency
+            };
+            
+            generationHistory.unshift(historyItem);
+            
+            // Keep only last 50 items
+            if (generationHistory.length > 50) {
+                generationHistory = generationHistory.slice(0, 50);
+            }
+            
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            
+            if (generationHistory.length === 0) {
+                historyList.innerHTML = '<p style="text-align: center; color: #666; margin-top: 100px;">No generation history yet</p>';
+                return;
+            }
+            
+            historyList.innerHTML = generationHistory.map(item => `
+                <div class="history-item">
+                    <div class="timestamp">${new Date(item.timestamp).toLocaleString()}</div>
+                    <div class="content">${item.content.substring(0, 200)}${item.content.length > 200 ? '...' : ''}</div>
+                    <div class="tags">
+                        <span class="tag">${item.type}</span>
+                        <span class="tag">${item.scenario}</span>
+                        <span class="tag">${item.tone}</span>
+                        ${item.urgency ? `<span class="tag">${item.urgency}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide urgency for apology initially if needed
+            const genType = document.getElementById('genType');
+            if (genType.value === 'apology') {
+                document.getElementById('urgencyGroup').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
